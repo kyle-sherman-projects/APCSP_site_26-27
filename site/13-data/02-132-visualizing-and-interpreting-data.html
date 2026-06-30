@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>13.2 Visualizing and Interpreting Data — AP CSP</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --bg:#0c1424; --panel:#14203a; --panel-2:#1b2c4d; --line:#2a3c5e;
+    --ink:#e9eff8; --ink-soft:#9db0d0; --ink-mute:#6c7fa3;
+    --accent:#36d6e0; --amber:#f2c14e; --radius:14px; --maxw:860px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"DM Sans", system-ui, sans-serif; font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:24px 20px 56px; }
+
+  /* Region scaffolding */
+  .region { margin-top:22px; }
+  .region-label {
+    font-family:"Space Mono", monospace; font-size:12px; letter-spacing:0.14em;
+    color:var(--ink-mute); text-transform:uppercase;
+    display:flex; align-items:center; gap:10px; margin-bottom:10px;
+  }
+  .region-label .num { color:var(--accent); }
+  .region-label .rule { flex:1; height:1px; background:var(--line); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
+  h1,h2,h3 { line-height:1.25; margin:0; }
+  a { color:var(--accent); }
+  code {
+    font-family:"Space Mono", monospace; background:rgba(54,214,224,0.10);
+    color:var(--accent); padding:1px 5px; border-radius:4px; font-size:0.9em;
+  }
+
+  /* Bilingual toggle */
+  .lang-toggle { display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .lang-toggle button {
+    background:transparent; color:var(--ink-mute); border:none; padding:4px 13px;
+    font-family:"Space Mono", monospace; font-size:11px; letter-spacing:0.1em; cursor:pointer;
+  }
+  .lang-toggle button[aria-pressed="true"] { background:var(--accent); color:var(--bg); font-weight:700; }
+  .lang-toggle button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .lang { display:none; }
+  .region.show-en .lang.en { display:inline; }
+  .region.show-es .lang.es { display:inline; }
+  .region.show-en .lang.en.block, .region.show-es .lang.es.block { display:block; }
+
+  /* 01 Orientation */
+  .orient { background:linear-gradient(180deg, var(--panel-2), var(--panel)); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
+  .code { font-family:"Space Mono", monospace; font-weight:700; color:var(--accent); font-size:14px; letter-spacing:0.06em; }
+  .orient h1 { font-size:30px; font-weight:700; margin:8px 0 14px; }
+  .meta { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip {
+    font-family:"Space Mono", monospace; font-size:12px; letter-spacing:0.04em; color:var(--ink-soft);
+    background:rgba(54,214,224,0.08); border:1px solid var(--line); border-radius:999px; padding:5px 11px;
+  }
+  .chip.big { color:var(--accent); border-color:var(--accent); }
+  .flow { display:flex; flex-wrap:wrap; gap:6px 4px; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line); }
+  .flow-step { font-family:"Space Mono", monospace; font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px; }
+  .flow-step .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .flow-step::after { content:"→"; color:var(--ink-mute); margin-left:4px; }
+  .flow-step:last-child::after { content:""; }
+
+  /* 02 Learning target */
+  .lg-tag { font-family:"Space Mono", monospace; font-size:12px; color:var(--accent); letter-spacing:0.06em; margin-bottom:10px; }
+  .target { font-size:18px; margin:0 0 8px; }
+  ul.objectives { margin:0; padding-left:0; list-style:none; }
+  ul.objectives li { position:relative; padding-left:24px; margin-bottom:7px; font-size:17px; }
+  ul.objectives li::before { content:"▸"; position:absolute; left:4px; color:var(--accent); }
+
+  /* 03 Vocabulary */
+  .vocab-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:12px; }
+  .term { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:14px 14px 15px; }
+  .term .word { font-family:"Space Mono", monospace; font-weight:700; color:var(--accent); font-size:15px; display:block; margin-bottom:4px; }
+  .term .def { font-size:14.5px; color:var(--ink-soft); display:block; }
+
+  /* 04 Today's work */
+  .materials { font-size:14.5px; color:var(--ink-soft); margin:0 0 18px; padding:12px 14px; background:var(--panel-2); border-radius:10px; border:1px solid var(--line); }
+  .materials strong { color:var(--ink); font-weight:500; }
+  ol.steps { list-style:none; counter-reset:s; margin:0; padding:0; }
+  ol.steps > li { counter-increment:s; position:relative; padding:0 0 16px 44px; margin:0; }
+  ol.steps > li::before {
+    content:counter(s); position:absolute; left:0; top:-2px; width:30px; height:30px;
+    font-family:"Space Mono", monospace; font-weight:700; font-size:14px;
+    color:var(--bg); background:var(--accent); border-radius:8px; display:grid; place-items:center;
+  }
+  ol.steps > li:last-child { padding-bottom:0; }
+  .tip { margin-top:8px; border-left:3px solid var(--amber); background:rgba(242,193,78,0.07); padding:12px 16px; border-radius:0 8px 8px 0; font-size:15px; }
+  .tip .tip-label { font-family:"Space Mono", monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--amber); display:block; margin-bottom:5px; }
+  .tip ul { margin:6px 0 0; padding-left:18px; }
+  .tip li { margin-bottom:4px; }
+  .btn-link {
+    display:inline-block; margin-top:18px; font-family:"Space Mono", monospace; font-size:14px;
+    color:var(--bg); background:var(--accent); text-decoration:none; padding:11px 18px; border-radius:9px; font-weight:700;
+  }
+  .btn-link:hover { background:#4ee2ec; }
+
+  /* 05 AP Classroom */
+  .ap-intro { margin:0 0 6px; }
+  .ap-sub { font-family:"Space Mono", monospace; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent); margin:18px 0 8px; }
+  .ap-list { margin:0; padding-left:0; list-style:none; }
+  .ap-list li { position:relative; padding:9px 0 9px 26px; border-bottom:1px solid var(--line); font-size:14.5px; color:var(--ink-soft); }
+  .ap-list li:last-child { border-bottom:none; }
+  .ap-list li::before { content:"▢"; position:absolute; left:2px; top:8px; color:var(--ink-mute); }
+  .ap-list .id { font-family:"Space Mono", monospace; color:var(--ink); font-size:13px; }
+
+  /* 06 Exit ticket */
+  .eq { font-size:18px; font-weight:500; margin:0 0 16px; }
+  .frame { border-left:3px solid var(--amber); background:rgba(242,193,78,0.07); padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:14px; }
+  .frame .frame-label { font-family:"Space Mono", monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--amber); display:block; margin-bottom:6px; }
+  .frame p { margin:0; font-size:15.5px; color:var(--ink); }
+  .frame .blank { color:var(--amber); font-weight:700; }
+  .then { font-size:15px; color:var(--ink-soft); margin:0 0 14px; }
+  textarea {
+    width:100%; min-height:110px; resize:vertical; background:var(--bg); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+    font-family:"DM Sans", sans-serif; font-size:16px; line-height:1.5;
+  }
+  textarea:focus { outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
+  .submit { margin-top:12px; font-family:"Space Mono", monospace; font-weight:700; font-size:14px; color:var(--bg); background:var(--accent); border:none; border-radius:9px; padding:11px 20px; cursor:pointer; }
+  .submit:hover { background:#4ee2ec; }
+  .submit:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+  .submit-note { font-size:12.5px; color:var(--ink-mute); margin:8px 0 0; font-family:"Space Mono", monospace; }
+
+  @media (max-width:480px) { .orient h1 { font-size:24px; } body { font-size:16px; } }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 01 · ORIENTATION -->
+  <header class="orient">
+    <div class="code">CodeHS 13.2 &nbsp;·&nbsp; Data</div>
+    <h1>Visualizing and Interpreting Data</h1>
+    <div class="meta">
+      <span class="chip">CodeHS 13.2</span>
+    </div>
+    <nav class="flow" aria-label="Today's flow">
+      <span class="flow-step"><span class="dot"></span>Visualizing Data</span>
+      <span class="flow-step"><span class="dot"></span>Visualizing Data Quiz</span>
+      <span class="flow-step"><span class="dot"></span>Exploring Data Visualiza…</span>
+      <span class="flow-step"><span class="dot"></span>Visualizations</span>
+      <span class="flow-step"><span class="dot"></span>Choosing a Visualization</span>
+      <span class="flow-step"><span class="dot"></span>Visualizing &amp; Interpreti…</span>
+    </nav>
+  </header>
+
+  <!-- 02 · LEARNING TARGET -->
+  <section class="region show-en">
+    <div class="region-label">
+      <span class="num">02</span> Learning target <span class="rule"></span>
+      <span class="lang-toggle" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></span>
+    </div>
+    <div class="panel">
+      
+      <div class="lg-tag">AP Topic 2.3 — Extracting Information from Data</div>
+      <p class="target">
+        <span class="lang en">By the end of today you will be able to:</span><span class="lang es">Al final de la clase de hoy, podrás:</span>
+      </p>
+      <ul class="objectives">
+        <li><span class="lang en">Explain the importance of visually depicting data to make information easier to use and to understand trends and changes in information</span><span class="lang es">Explain the importance of visually depicting data to make information easier to use and to understand trends and changes in information</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 03 · VOCABULARY -->
+  <section class="region show-en">
+    <div class="region-label">
+      <span class="num">03</span> Vocabulary <span class="rule"></span>
+      <span class="lang-toggle" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></span>
+    </div>
+    <div class="panel">
+      <div class="vocab-grid">
+        <div class="term"><span class="word">Data Visualization</span><span class="def"><span class="lang en">Using charts, graphs, or images to visualize complex data.</span><span class="lang es">Using charts, graphs, or images to visualize complex data.</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · TODAY'S WORK -->
+  <section class="region show-en">
+    <div class="region-label">
+      <span class="num">04</span> Today's work <span class="rule"></span>
+      <span class="lang-toggle" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></span>
+    </div>
+    <div class="panel">
+      
+      <p class="materials">
+        <span class="lang en block"><strong>Where:</strong> CodeHS → Data → 13.2 Visualizing and Interpreting Data</span><span class="lang es block"><strong>Dónde:</strong> CodeHS → Data → 13.2 Visualizing and Interpreting Data</span>
+      </p>
+      <ol class="steps">
+        <li><span class="lang en">Visualizing Data (13.2.1)</span><span class="lang es">Visualizing Data (13.2.1)</span></li>
+        <li><span class="lang en">Visualizing Data Quiz (13.2.2)</span><span class="lang es">Visualizing Data Quiz (13.2.2)</span></li>
+        <li><span class="lang en">Exploring Data Visualizations (13.2.3)</span><span class="lang es">Exploring Data Visualizations (13.2.3)</span></li>
+        <li><span class="lang en"><strong>Respond</strong>: Visualizations (13.2.4)</span><span class="lang es"><strong>Respond</strong>: Visualizations (13.2.4)</span></li>
+        <li><span class="lang en"><strong>Free Response</strong>: Choosing a Visualization (13.2.5)</span><span class="lang es"><strong>Free Response</strong>: Choosing a Visualization (13.2.5)</span></li>
+        <li><span class="lang en">Visualizing &amp; Interpreting Data Quiz (13.2.6)</span><span class="lang es">Visualizing &amp; Interpreting Data Quiz (13.2.6)</span></li>
+      </ol>
+      <a class="btn-link" href="#">
+        <span class="lang en">Open CodeHS →</span><span class="lang es">Abrir CodeHS →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 05 · AP CLASSROOM -->
+  <section class="region show-en">
+    <div class="region-label">
+      <span class="num">05</span> AP Classroom <span class="rule"></span>
+      <span class="lang-toggle" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></span>
+    </div>
+    <div class="panel">
+      <p class="ap-intro"><span class="lang en">This lesson connects to <strong>AP Topic 2.3 — Extracting Information from Data</strong>.</span><span class="lang es">This lesson connects to <strong>AP Topic 2.3 — Extracting Information from Data</strong>.</span></p>
+      <div class="ap-sub"><span class="lang en">Watch — AP Daily Videos</span><span class="lang es">Mira — AP Daily Videos</span></div>
+      <ul class="ap-list">
+      <li><span class="id">2.3: Daily Video 1</span> — Examine potential issues that come with analyzing data</li>
+      <li><span class="id">2.3: Daily Video 2</span> — Extract knowledge from data and metadata; causation vs. correlation</li>
+      </ul>
+      <div class="ap-sub"><span class="lang en">Complete — Topic Questions</span><span class="lang es">Completa — Topic Questions</span></div>
+      <ul class="ap-list">
+      <li><span class="id">MCQ</span> — Determine artist with the most concert attendees</li>
+      <li><span class="id">MCQ</span> — Information from student work habit survey</li>
+      </ul>
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+      <p class="ap-intro"><span class="lang en">This lesson connects to <strong>AP Topic 2.4 — Using Programs with Data</strong>.</span><span class="lang es">This lesson connects to <strong>AP Topic 2.4 — Using Programs with Data</strong>.</span></p>
+      <div class="ap-sub"><span class="lang en">Complete — Topic Questions</span><span class="lang es">Completa — Topic Questions</span></div>
+      <ul class="ap-list">
+      <li><span class="id">MCQ</span> — Bookstore spreadsheet</li>
+      <li><span class="id">MCQ</span> — Clothing store sales information</li>
+      <li><span class="id">MCQ</span> — Museum photograph spreadsheet</li>
+      <li><span class="id">MCQ</span> — Radio show spreadsheet</li>
+      </ul>
+      <a class="btn-link" href="#">
+        <span class="lang en">Open AP Classroom →</span><span class="lang es">Abrir AP Classroom →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 06 · EXIT TICKET -->
+  <section class="region show-en">
+    <div class="region-label">
+      <span class="num">06</span> Exit ticket <span class="rule"></span>
+      <span class="lang-toggle" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></span>
+    </div>
+    <div class="panel">
+      
+      <p class="eq"><span class="lang en">What kind of information does a line graph display?</span><span class="lang es">What kind of information does a line graph display?</span></p>
+      <div class="frame">
+        <span class="frame-label">
+          <span class="lang en">Sentence frame — use this to start</span><span class="lang es">Marco de oración — úsalo para empezar</span>
+        </span>
+        <p class="lang en">Today I learned that <span class="blank">______</span>. This connects to <span class="blank">______</span> because <span class="blank">______</span>.</p>
+        <p class="lang es">Hoy aprendí que <span class="blank">______</span>. Esto se conecta con <span class="blank">______</span> porque <span class="blank">______</span>.</p>
+      </div>
+      <label for="exit" style="display:none">Your answer</label>
+      <textarea id="exit"
+        data-ph-en="Write 2–3 sentences here…"
+        data-ph-es="Escribe 2–3 oraciones aquí…"
+        placeholder="Write 2–3 sentences here…"></textarea>
+      <button class="submit" type="button">
+        <span class="lang en">Submit exit ticket</span><span class="lang es">Enviar boleto de salida</span>
+      </button>
+      <p class="submit-note">// wire this button to your Google Form pre-fill URL</p>
+    </div>
+  </section>
+</div>
+<script>
+  document.querySelectorAll('.lang-toggle').forEach(function (group) {
+    group.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      var region = group.closest('.region');
+      var lang = btn.getAttribute('data-lang');
+      region.classList.remove('show-en', 'show-es');
+      region.classList.add('show-' + lang);
+      group.querySelectorAll('button').forEach(function (b) {
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      var field = region.querySelector('[data-ph-en]');
+      if (field) { field.placeholder = field.getAttribute('data-ph-' + lang) || field.placeholder; }
+    });
+  });
+</script>
+</body>
+</html>
